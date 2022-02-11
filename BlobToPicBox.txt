@@ -1,0 +1,65 @@
+﻿Insert the following code in the Click event procedure of Button2 (Database to PictureBox). This code retrieves the rows 
+from the BLOBTest table in the database into a DataSet, copies the most recently added image into a Byte array and then 
+https://docs.microsoft.com/en-us/troubleshoot/dotnet/csharp/copy-image-database-picturebox
+
+into a MemoryStream object, and then loads the MemoryStream into the Image property of the PictureBox control.
+C#
+
+try
+{
+    SqlConnection cn = new SqlConnection(strCn);
+    cn.Open();
+
+    //Retrieve BLOB from database into DataSet.
+    SqlCommand cmd = new SqlCommand("SELECT BLOBID, BLOBData FROM BLOBTest ORDER BY BLOBID", cn);
+    SqlDataAdapter da = new SqlDataAdapter(cmd);
+    DataSet ds = new DataSet();
+    da.Fill(ds, "BLOBTest");
+    int c = ds.Tables["BLOBTest"].Rows.Count;
+
+    if(c>0)
+    {
+        //BLOB is read into Byte array, then used to construct MemoryStream,
+        //then passed to PictureBox.
+        Byte[] byteBLOBData = new Byte[0];
+        byteBLOBData = (Byte[])(ds.Tables["BLOBTest"].Rows[c - 1]["BLOBData"]);
+        MemoryStream stmBLOBData = new MemoryStream(byteBLOBData);
+        pictureBox1.Image= Image.FromStream(stmBLOBData);
+    }
+    cn.Close();
+}
+catch(Exception ex)
+{
+    MessageBox.Show(ex.Message);
+}
+
+Intercept the Enter key and redirect it to the Go button
+public class CustomizedTextBox : System.Windows.Forms.TextBox 
+{    
+    // This method intercepts the Enter Key
+    // signal before the containing Form does
+    protected override bool ProcessCmdKey(ref 
+              System.Windows.Forms.Message m, 
+              System.Windows.Forms.Keys k) 
+    {
+        // detect the pushing (Msg) of Enter Key (k)
+        if(m.Msg == 256 && k == 
+               System.Windows.Forms.Keys.Enter) 
+        {
+        REDIRECT TO GO BUTTON HERE
+            // Execute an alternative action: here we
+            // tabulate in order to focus
+            // on the next control in the formular
+            System.Windows.Forms.SendKeys.Send("\t");
+            // return true to stop any further
+            // interpretation of this key action
+            return true; 
+        }
+        // if not pushing Enter Key,
+        // then process the signal as usual
+        return base.ProcessCmdKey(ref m,k);
+    }
+}
+
+----------------------------------
+
